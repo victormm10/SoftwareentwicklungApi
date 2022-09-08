@@ -29,14 +29,6 @@ namespace WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //GET DATABASE FILE DIRECTORY
-            var parent = System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).FullName;
-            var path = Path.Combine(parent, @"ClassLibrary\DataBaseFile\ProductsDB.mdf");
-
-            services.AddDbContext<LocalDBMSSQLLocalDBContext>(options =>
-                options.UseSqlServer(
-                    string.Format(Configuration["ConnectionStrings:DefaultConnection"], path)), ServiceLifetime.Transient);
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
