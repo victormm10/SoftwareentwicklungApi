@@ -1,10 +1,12 @@
 ﻿using ClassLibrary.Models;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAPI.Validators;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,9 +17,12 @@ namespace WebAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private LocalDBMSSQLLocalDBContext _database;
-        public ProductsController(LocalDBMSSQLLocalDBContext database)
+        private ProductValidator _validator;
+
+        public ProductsController(LocalDBMSSQLLocalDBContext database, ProductValidator validator)
         {
             _database = database;
+            _validator = validator;
         }
 
         /// <summary>
@@ -52,7 +57,10 @@ namespace WebAPI.Controllers
         [Route("SaveProductItem")]
         public async Task<ActionResult> SaveProductItem(ProductItem product)
         {
-            var entry = _database.Entry(product);
+            ValidationResult results = _validator.Validate(product);
+
+            if (!results.IsValid)
+                return BadRequest();
 
             _database.ProductItem.Add(product);
             await _database.SaveChangesAsync();
@@ -69,6 +77,11 @@ namespace WebAPI.Controllers
         [Route("UpdateProductItem")]
         public async Task<ActionResult> UpdateProductItem(ProductItem product)
         {
+            ValidationResult results = _validator.Validate(product);
+
+            if (!results.IsValid)
+                return BadRequest();
+
             var dbItem = _database.ProductItem.SingleOrDefault(x => x.Id == product.Id);
 
             var entry = _database.Entry(dbItem);
@@ -92,6 +105,10 @@ namespace WebAPI.Controllers
 
             _database.ProductItem.Remove(dbItem);
             await _database.SaveChangesAsync();
+
+            var exists = _database.ProductItem.Where(x => x.Id == id).Any();
+            if (exists)
+                return BadRequest();
 
             return Ok();
         }
