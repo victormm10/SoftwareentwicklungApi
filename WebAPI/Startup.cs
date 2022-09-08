@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAPI.Validators;
 
 namespace WebAPI
 {
@@ -36,6 +37,8 @@ namespace WebAPI
             services.AddDbContext<LocalDBMSSQLLocalDBContext>(options =>
                 options.UseSqlServer(
                     string.Format(Configuration["ConnectionStrings:DefaultConnection"], path)), ServiceLifetime.Transient);
+
+            services.AddSingleton<ProductValidator>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
