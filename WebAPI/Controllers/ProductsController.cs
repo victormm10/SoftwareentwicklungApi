@@ -49,6 +49,18 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
+        /// Validate if the product name is available
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("CheckIfProductExists/{name}")]
+        public async Task<bool> CheckIfProductExists(string name)
+        {
+            return await _database.ProductItem.Where(x => x.Name.ToLower() == name.ToLower()).AnyAsync();
+        }
+
+        /// <summary>
         /// Add new product
         /// </summary>
         /// <param name="product"></param>
