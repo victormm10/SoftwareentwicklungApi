@@ -77,7 +77,7 @@ namespace WebAPI.Controllers
             _database.ProductItem.Add(product);
             await _database.SaveChangesAsync();
 
-            return Ok();
+            return Ok(product);
         }
 
         /// <summary>

@@ -40,7 +40,12 @@ namespace WebAPI
 
             services.AddSingleton<ProductValidator>();
 
-            services.AddControllers();
+            services.AddControllers()
+            .AddJsonOptions(options =>
+             {
+                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
+             });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPI Softwareentwicklung", Version = "v1" });
