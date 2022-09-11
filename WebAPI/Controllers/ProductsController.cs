@@ -42,7 +42,7 @@ namespace WebAPI.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("GetProductById")]
+        [Route("GetProductById/{id}")]
         public async Task<ProductItem> GetProductById(int id)
         {
             return await _database.ProductItem.Where(x => x.Id == id).FirstOrDefaultAsync();
