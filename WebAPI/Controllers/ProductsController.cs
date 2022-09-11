@@ -33,7 +33,7 @@ namespace WebAPI.Controllers
         [Route("GetProductList")]
         public async Task<List<ProductItem>> GetProductList()
         {
-            return await _database.ProductItem.ToListAsync();
+            return await _database.ProductItem.OrderByDescending( o => o.Id ).ToListAsync();
         }
 
         /// <summary>
@@ -42,10 +42,22 @@ namespace WebAPI.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("GetProductById")]
+        [Route("GetProductById/{id}")]
         public async Task<ProductItem> GetProductById(int id)
         {
             return await _database.ProductItem.Where(x => x.Id == id).FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Validate if the product name is available
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("CheckIfProductExists/{name}")]
+        public async Task<bool> CheckIfProductExists(string name)
+        {
+            return await _database.ProductItem.Where(x => x.Name.ToLower() == name.ToLower()).AnyAsync();
         }
 
         /// <summary>
@@ -65,7 +77,7 @@ namespace WebAPI.Controllers
             _database.ProductItem.Add(product);
             await _database.SaveChangesAsync();
 
-            return Ok();
+            return Ok(product);
         }
 
         /// <summary>
@@ -98,7 +110,7 @@ namespace WebAPI.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete]
-        [Route("DeleteProductById")]
+        [Route("DeleteProductById/{id}")]
         public async Task<ActionResult> DeleteProductById(int id)
         {
             var dbItem = _database.ProductItem.SingleOrDefault(x => x.Id == id);
