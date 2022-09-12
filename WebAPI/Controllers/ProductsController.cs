@@ -1,4 +1,5 @@
 ﻿using ClassLibrary.Models;
+using ClassLibrary.Repositories;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +17,12 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private LocalDBMSSQLLocalDBContext _database;
+        private IProductRepository _productRepo;
         private ProductValidator _validator;
 
-        public ProductsController(LocalDBMSSQLLocalDBContext database, ProductValidator validator)
+        public ProductsController(IProductRepository productRepo, ProductValidator validator)
         {
-            _database = database;
+            _productRepo = productRepo;
             _validator = validator;
         }
 
@@ -33,7 +34,7 @@ namespace WebAPI.Controllers
         [Route("GetProductList")]
         public async Task<List<ProductItem>> GetProductList()
         {
-            return await _database.ProductItem.OrderByDescending( o => o.Id ).ToListAsync();
+            return await _productRepo.GetProductListAsync();
         }
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace WebAPI.Controllers
         [Route("GetProductById/{id}")]
         public async Task<ProductItem> GetProductById(int id)
         {
-            return await _database.ProductItem.Where(x => x.Id == id).FirstOrDefaultAsync();
+            return await _productRepo.GetProductByIdAsync(id);
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace WebAPI.Controllers
         [Route("CheckIfProductExists/{name}")]
         public async Task<bool> CheckIfProductExists(string name)
         {
-            return await _database.ProductItem.Where(x => x.Name.ToLower() == name.ToLower()).AnyAsync();
+            return await _productRepo.CheckIfProductExistsAsync(name);
         }
 
         /// <summary>
@@ -74,10 +75,9 @@ namespace WebAPI.Controllers
             if (!results.IsValid)
                 return BadRequest();
 
-            _database.ProductItem.Add(product);
-            await _database.SaveChangesAsync();
+            var newProduct = await _productRepo.AddProductAsync(product);
 
-            return Ok(product);
+            return Ok(newProduct);
         }
 
         /// <summary>
@@ -94,12 +94,7 @@ namespace WebAPI.Controllers
             if (!results.IsValid)
                 return BadRequest();
 
-            var dbItem = _database.ProductItem.SingleOrDefault(x => x.Id == product.Id);
-
-            var entry = _database.Entry(dbItem);
-            entry.CurrentValues.SetValues(product);
-
-            await _database.SaveChangesAsync();
+            await _productRepo.UpdateProductAsync(product);
 
             return Ok();
         }
@@ -113,13 +108,8 @@ namespace WebAPI.Controllers
         [Route("DeleteProductById/{id}")]
         public async Task<ActionResult> DeleteProductById(int id)
         {
-            var dbItem = _database.ProductItem.SingleOrDefault(x => x.Id == id);
-
-            _database.ProductItem.Remove(dbItem);
-            await _database.SaveChangesAsync();
-
-            var exists = _database.ProductItem.Where(x => x.Id == id).Any();
-            if (exists)
+            var deleted = await _productRepo.DeleteProductAsync(id);
+            if (!deleted)
                 return BadRequest();
 
             return Ok();
