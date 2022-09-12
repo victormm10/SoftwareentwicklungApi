@@ -1,19 +1,14 @@
-using ClassLibrary.Models;
+using ClassLibrary.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
+using SqlServerInfrascture;
+using SqlServerInfrascture.Repositories;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using WebAPI.Validators;
 
 namespace WebAPI
@@ -30,14 +25,11 @@ namespace WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //GET DATABASE FILE DIRECTORY
-            var parent = System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).FullName;
-            var path = Path.Combine(parent, @"ClassLibrary\DataBaseFile\ProductsDB.mdf");
+            //services.AddDbContext<SqlServerDbContext>(options =>
+            //    options.UseSqlServer(
+            //        string.Format(Configuration["ConnectionStrings:DefaultConnection"], path)), ServiceLifetime.Transient);
 
-            services.AddDbContext<LocalDBMSSQLLocalDBContext>(options =>
-                options.UseSqlServer(
-                    string.Format(Configuration["ConnectionStrings:DefaultConnection"], path)), ServiceLifetime.Transient);
-
+            services.AddSingleton<IProductRepository, SqlServerProductRepository>();
             services.AddSingleton<ProductValidator>();
 
             services.AddControllers()
