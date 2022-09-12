@@ -9,6 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["WebAPI/WebAPI.csproj", "WebAPI/"]
 COPY ["ClassLibrary/ClassLibrary.csproj", "ClassLibrary/"]
+COPY ["SqlServerInfrascture/SqlServerInfrascture.csproj", "SqlServerInfrascture/"]
 RUN dotnet restore "WebAPI/WebAPI.csproj"
 COPY . .
 WORKDIR "/src/WebAPI"
@@ -21,7 +22,3 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "WebAPI.dll"]
-
-# FROM final as runing
-# WORKDIR /app
-# RUN dotnet run /
